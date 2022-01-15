@@ -27,7 +27,7 @@ app0_size = struct.unpack(">h", jpeg_bin[jpeg_pointer:jpeg_pointer + 2])[0]
 app0_end = app0_size + jpeg_pointer
 jpeg_pointer += 2
 
-# Add the JFIF APP0 identifier (alway \x4A\x46\x49\x46\x00, which is also a valid js identifier
+# Add the JFIF APP0 identifier (always \x4A\x46\x49\x46\x00, which is also a valid js identifier
 out.extend(jpeg_bin[jpeg_pointer:jpeg_pointer + 5])
 jpeg_pointer += 5
 
@@ -51,13 +51,18 @@ out.extend(b"\x2A\x2F") # Close the js comment
 out.extend(js_bin) # inject js code
 out.extend(b"\x2F\x2A") # Open another js comment, ignoring all subsequent jpg data
 
-# Add the rest of the jpg
+# Add the rest of the jpg, up to the EOI marker
 jpeg_pointer = app0_end
-out.extend(jpeg_bin[jpeg_pointer:])
+out.extend(jpeg_bin[jpeg_pointer:-2])
 
+# add a comment block, 6 bytes long
+out.extend(b"\xFF\xFE\00\06")
 
-# modify the last two bytes before the EOI marker to close the js comment
-out[-4:-2] = b"\x2A\x2F"
+# close the js multiline comment and start a singleline one
+out.extend(b"*///")
+
+# add the EOI marker
+out.extend(b"\xFF\xD9")
 
 with open(sys.argv[3], "wb") as out_polyglot:
     out_polyglot.write(out)
