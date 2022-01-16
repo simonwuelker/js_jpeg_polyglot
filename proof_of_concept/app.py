@@ -4,11 +4,11 @@ app = Flask(__name__)
 
 @app.route('/image')
 def image():
-    return send_file('polyglot.jpg', mimetype='image/jpg')
+    return send_file('polyglot.jpg')
 
 @app.route('/script')
 def script():
-    return send_file('polyglot.jpg', mimetype='text/javascript')
+    return send_file('polyglot.jpg')
 
 @app.route('/')
 def hello_world():
